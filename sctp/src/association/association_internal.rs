@@ -904,7 +904,7 @@ impl AssociationInternal {
         let can_push = self.payload_queue.can_push(d, self.peer_last_tsn);
         let mut stream_handle_data = false;
         if can_push {
-            if let Some(_s) = self.get_or_create_stream(d.stream_identifier) {
+            if let Some(_s) = self.streams.get(&d.stream_identifier).cloned() {
                 if self.get_my_receiver_window_credit().await > 0 {
                     // Pass the new chunk to stream level as soon as it arrives
                     self.payload_queue.push(d.clone(), self.peer_last_tsn);
