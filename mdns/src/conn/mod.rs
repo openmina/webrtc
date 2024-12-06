@@ -4,9 +4,10 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use socket2::SockAddr;
-use tokio::net::{ToSocketAddrs, UdpSocket};
+use tokio::net::ToSocketAddrs;
 use tokio::sync::{mpsc, Mutex};
-use util::ifaces;
+use util::conn::conn_udp::UdpSocket;
+use util::{ifaces, Conn};
 
 use crate::config::*;
 use crate::error::*;
@@ -149,7 +150,7 @@ impl DnsConn {
         }
 
         log::trace!("Sending close command to server");
-        match self.close_server.send(()).await {
+        let res = match self.close_server.send(()).await {
             Ok(_) => {
                 log::trace!("Close command sent");
                 Ok(())
@@ -158,7 +159,9 @@ impl DnsConn {
                 log::warn!("Error sending close command to server: {:?}", e);
                 Err(Error::ErrConnectionClosed)
             }
-        }
+        };
+        let _ = self.socket.close().await;
+        res
     }
 
     /// Query sends mDNS Queries for the following name until

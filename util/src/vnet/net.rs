@@ -7,10 +7,10 @@ use std::str::FromStr;
 use std::sync::atomic::Ordering;
 use std::sync::Arc;
 
+use crate::conn::conn_udp::UdpSocket;
 use async_trait::async_trait;
 use ipnet::IpNet;
 use portable_atomic::AtomicU64;
-use tokio::net::UdpSocket;
 use tokio::sync::Mutex;
 
 use super::conn_map::*;
