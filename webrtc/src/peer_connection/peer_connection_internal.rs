@@ -126,8 +126,11 @@ impl PeerConnectionInternal {
 
         // Create the DTLS transport
         let certificates = configuration.certificates.drain(..).collect();
-        pc.dtls_transport =
-            Arc::new(api.new_dtls_transport(Arc::clone(&pc.ice_transport), certificates)?);
+        pc.dtls_transport = Arc::new(api.new_dtls_transport(
+            Arc::clone(&pc.ice_transport),
+            certificates,
+            configuration.seed.clone(),
+        )?);
 
         // Create the SCTP transport
         pc.sctp_transport = Arc::new(api.new_sctp_transport(Arc::clone(&pc.dtls_transport))?);

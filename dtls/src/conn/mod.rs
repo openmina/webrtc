@@ -251,6 +251,7 @@ impl DTLSConn {
             retransmit_interval,
             //log: logger,
             initial_epoch: 0,
+            seed: config.seed,
             ..Default::default()
         };
 

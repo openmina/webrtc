@@ -1,4 +1,4 @@
-use rand_core::OsRng; // requires 'getrandom' feature
+use rand::{rngs::StdRng, SeedableRng};
 
 use crate::error::*;
 
@@ -35,10 +35,17 @@ pub struct NamedCurveKeypair {
     pub(crate) private_key: NamedCurvePrivateKey,
 }
 
-fn elliptic_curve_keypair(curve: NamedCurve) -> Result<NamedCurveKeypair> {
+fn elliptic_curve_keypair(curve: NamedCurve, seed: Option<[u8; 32]>) -> Result<NamedCurveKeypair> {
+    let mut rng = if let Some(seed) = seed {
+        // dbg!(format!("{seed:x?}"));
+        StdRng::from_seed(seed)
+    } else {
+        StdRng::from_entropy()
+    };
+
     let (public_key, private_key) = match curve {
         NamedCurve::P256 => {
-            let secret_key = p256::ecdh::EphemeralSecret::random(&mut OsRng);
+            let secret_key = p256::ecdh::EphemeralSecret::random(&mut rng);
             let public_key = p256::EncodedPoint::from(secret_key.public_key());
             (
                 public_key.as_bytes().to_vec(),
@@ -46,7 +53,7 @@ fn elliptic_curve_keypair(curve: NamedCurve) -> Result<NamedCurveKeypair> {
             )
         }
         NamedCurve::P384 => {
-            let secret_key = p384::ecdh::EphemeralSecret::random(&mut OsRng);
+            let secret_key = p384::ecdh::EphemeralSecret::random(&mut rng);
             let public_key = p384::EncodedPoint::from(secret_key.public_key());
             (
                 public_key.as_bytes().to_vec(),
@@ -54,7 +61,7 @@ fn elliptic_curve_keypair(curve: NamedCurve) -> Result<NamedCurveKeypair> {
             )
         }
         NamedCurve::X25519 => {
-            let secret_key = x25519_dalek::StaticSecret::random_from_rng(OsRng);
+            let secret_key = x25519_dalek::StaticSecret::random_from_rng(rng);
             let public_key = x25519_dalek::PublicKey::from(&secret_key);
             (
                 public_key.as_bytes().to_vec(),
@@ -72,12 +79,7 @@ fn elliptic_curve_keypair(curve: NamedCurve) -> Result<NamedCurveKeypair> {
 }
 
 impl NamedCurve {
-    pub fn generate_keypair(&self) -> Result<NamedCurveKeypair> {
-        match *self {
-            NamedCurve::X25519 => elliptic_curve_keypair(NamedCurve::X25519),
-            NamedCurve::P256 => elliptic_curve_keypair(NamedCurve::P256),
-            NamedCurve::P384 => elliptic_curve_keypair(NamedCurve::P384),
-            _ => Err(Error::ErrInvalidNamedCurve),
-        }
+    pub fn generate_keypair(&self, seed: Option<[u8; 32]>) -> Result<NamedCurveKeypair> {
+        elliptic_curve_keypair(*self, seed)
     }
 }

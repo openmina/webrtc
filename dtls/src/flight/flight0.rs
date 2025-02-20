@@ -154,7 +154,20 @@ impl Flight for Flight0 {
             }
 
             if state.local_keypair.is_none() {
-                state.local_keypair = match state.named_curve.generate_keypair() {
+                let seed = cfg.seed.as_ref().map(|seed| {
+                    use sha2::{
+                        digest::{FixedOutput, Update},
+                        Sha256,
+                    };
+
+                    Sha256::default()
+                        .chain(seed)
+                        .chain(&state.cookie)
+                        .finalize_fixed()
+                        .into()
+                });
+
+                state.local_keypair = match state.named_curve.generate_keypair(seed) {
                     Ok(local_keypar) => Some(local_keypar),
                     Err(err) => {
                         return Err((

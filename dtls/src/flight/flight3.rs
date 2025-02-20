@@ -433,7 +433,19 @@ pub(crate) fn handle_server_key_exchange(
         state.identity_hint = h.identity_hint.clone();
         state.pre_master_secret = prf_psk_pre_master_secret(&psk);
     } else {
-        let local_keypair = match h.named_curve.generate_keypair() {
+        let seed = cfg.seed.as_ref().map(|seed| {
+            use sha2::{
+                digest::{FixedOutput, Update},
+                Sha256,
+            };
+
+            Sha256::default()
+                .chain(seed)
+                .chain(&state.cookie)
+                .finalize_fixed()
+                .into()
+        });
+        let local_keypair = match h.named_curve.generate_keypair(seed) {
             Ok(local_keypair) => local_keypair,
             Err(err) => {
                 return Err((

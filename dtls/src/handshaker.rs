@@ -96,6 +96,7 @@ pub(crate) struct HandshakeConfig {
     pub(crate) client_cert_verifier: Option<Arc<dyn ClientCertVerifier>>,
     pub(crate) retransmit_interval: tokio::time::Duration,
     pub(crate) initial_epoch: u16,
+    pub(crate) seed: Option<Vec<u8>>,
     //log           logging.LeveledLogger
     //mu sync.Mutex
 }
@@ -138,6 +139,7 @@ impl Default for HandshakeConfig {
             client_cert_verifier: None,
             retransmit_interval: tokio::time::Duration::from_secs(0),
             initial_epoch: 0,
+            seed: None,
         }
     }
 }

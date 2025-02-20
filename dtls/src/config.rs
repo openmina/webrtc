@@ -100,6 +100,9 @@ pub struct Config {
     /// Packet with sequence number older than this value compared to the latest
     /// accepted packet will be discarded. (default is 64)
     pub replay_protection_window: usize,
+
+    /// master seed for generation ephemeral keys
+    pub seed: Option<Vec<u8>>,
 }
 
 impl Default for Config {
@@ -123,6 +126,7 @@ impl Default for Config {
             server_name: String::default(),
             mtu: 0,
             replay_protection_window: 0,
+            seed: None,
         }
     }
 }

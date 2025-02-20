@@ -83,6 +83,8 @@ pub struct RTCDtlsTransport {
     pub(crate) srtp_ready_rx: Mutex<Option<mpsc::Receiver<()>>>,
 
     pub(crate) dtls_matcher: Option<MatchFunc>,
+
+    seed: Option<Vec<u8>>,
 }
 
 impl RTCDtlsTransport {
@@ -90,6 +92,7 @@ impl RTCDtlsTransport {
         ice_transport: Arc<RTCIceTransport>,
         certificates: Vec<RTCCertificate>,
         setting_engine: Arc<SettingEngine>,
+        seed: Option<Vec<u8>>,
     ) -> Self {
         let (srtp_ready_tx, srtp_ready_rx) = mpsc::channel(1);
         RTCDtlsTransport {
@@ -101,6 +104,7 @@ impl RTCDtlsTransport {
             srtp_ready_rx: Mutex::new(Some(srtp_ready_rx)),
             state: AtomicU8::new(RTCDtlsTransportState::New as u8),
             dtls_matcher: Some(Box::new(match_dtls)),
+            seed,
             ..Default::default()
         }
     }
@@ -359,6 +363,7 @@ impl RTCDtlsTransport {
                 client_auth: ClientAuthType::RequireAnyClientCert,
                 insecure_skip_verify: true,
                 insecure_verification: self.setting_engine.allow_insecure_verification_algorithm,
+                seed: self.seed.clone(),
                 ..Default::default()
             },
         ))

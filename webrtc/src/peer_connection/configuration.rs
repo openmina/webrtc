@@ -47,6 +47,9 @@ pub struct RTCConfiguration {
 
     /// icecandidate_pool_size describes the size of the prefetched ICE pool.
     pub ice_candidate_pool_size: u8,
+
+    /// master seed for generation ephemeral keys
+    pub seed: Option<Vec<u8>>,
 }
 
 impl RTCConfiguration {

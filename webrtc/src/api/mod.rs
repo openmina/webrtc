@@ -81,6 +81,7 @@ impl API {
         &self,
         ice_transport: Arc<RTCIceTransport>,
         mut certificates: Vec<RTCCertificate>,
+        seed: Option<Vec<u8>>,
     ) -> Result<RTCDtlsTransport> {
         if !certificates.is_empty() {
             let now = SystemTime::now();
@@ -99,6 +100,7 @@ impl API {
             ice_transport,
             certificates,
             Arc::clone(&self.setting_engine),
+            seed,
         ))
     }
 
